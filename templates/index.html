@@ -147,12 +147,13 @@
     <div class="title">Comparador Facial</div>
 
     <div class="panel">
-      <form id="formCompare" action="/compare" method="post" enctype="multipart/form-data">
+      <form id="formCompare" enctype="multipart/form-data">
         <div class="grid">
+          
           <div class="card">
             <h3>Foto 1</h3>
             <div class="file">
-              <input id="image1" name="image1" type="file" accept="image/*" required />
+              <input id="img1" name="img1" type="file" accept="image/*" required />
             </div>
             <img id="preview1" class="preview" alt="Prévia Foto 1">
           </div>
@@ -160,10 +161,11 @@
           <div class="card">
             <h3>Foto 2</h3>
             <div class="file">
-              <input id="image2" name="image2" type="file" accept="image/*" required />
+              <input id="img2" name="img2" type="file" accept="image/*" required />
             </div>
             <img id="preview2" class="preview" alt="Prévia Foto 2">
           </div>
+
         </div>
 
         <div class="actions">
@@ -177,73 +179,88 @@
         <div class="hint">
           Dica: fotos mais nítidas e com o rosto de frente dão resultado melhor.
         </div>
+
       </form>
     </div>
   </div>
 
-  <script>
-    function setPreview(inputId, previewId){
-      const input = document.getElementById(inputId);
-      const img = document.getElementById(previewId);
+<script>
 
-      input.addEventListener("change", () => {
-        const file = input.files && input.files[0];
-        if (!file) {
-          img.style.display = "none";
-          img.src = "";
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          img.src = e.target.result;
-          img.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      });
-    }
+const form = document.getElementById("formCompare")
+const resultBox = document.getElementById("resultBox")
 
-    setPreview("image1", "preview1");
-    setPreview("image2", "preview2");
+form.addEventListener("submit", async (e)=>{
 
-    // (Opcional) enviar sem recarregar a página:
-    const form = document.getElementById("formCompare");
-    const resultBox = document.getElementById("resultBox");
-    const btn = document.getElementById("btnCompare");
+e.preventDefault()
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+const formData = new FormData()
 
-      const fd = new FormData(form);
-      resultBox.classList.remove("error");
-      resultBox.innerText = "Comparando...";
+formData.append("img1", document.getElementById("img1").files[0])
+formData.append("img2", document.getElementById("img2").files[0])
 
-      btn.disabled = true;
-      btn.style.opacity = "0.8";
+resultBox.innerText = "Comparando..."
 
-      try {
-        const res = await fetch("/api/compare", { method: "POST", body: fd });
-        const data = await res.json();
+try{
 
-        if (!res.ok) {
-          const msg = data?.error || "Erro ao comparar.";
-          resultBox.classList.add("error");
-          resultBox.innerText = "Erro: " + msg;
-        } else {
-          if (data?.confidence == null) {
-            resultBox.classList.add("error");
-            resultBox.innerText = "Erro: a API não retornou confidence. " + JSON.stringify(data);
-          } else {
-            resultBox.innerHTML = `Semelhança (confidence): <b>${Number(data.confidence).toFixed(2)}</b>`;
-          }
-        }
-      } catch (err) {
-        resultBox.classList.add("error");
-        resultBox.innerText = "Erro: Falha de rede ao comparar.";
-      } finally {
-        btn.disabled = false;
-        btn.style.opacity = "1";
-      }
-    });
-  </script>
+const res = await fetch("/api/compare",{
+method:"POST",
+body:formData
+})
+
+const data = await res.json()
+
+if(data.error){
+resultBox.innerText = "Erro: " + data.error
+return
+}
+
+resultBox.innerHTML = "Semelhança: <b>" + data.confidence.toFixed(2) + "</b>"
+
+}catch{
+
+resultBox.innerText = "Erro ao comparar."
+
+}
+
+})
+
+</script>
+</body>
+</html>
+<script>
+
+function mostrarPreview(inputId, previewId){
+
+const input = document.getElementById(inputId)
+const preview = document.getElementById(previewId)
+
+input.addEventListener("change", function(){
+
+const file = this.files[0]
+
+if(file){
+
+const reader = new FileReader()
+
+reader.onload = function(e){
+
+preview.src = e.target.result
+preview.style.display = "block"
+
+}
+
+reader.readAsDataURL(file)
+
+}
+
+})
+
+}
+
+mostrarPreview("img1","preview1")
+mostrarPreview("img2","preview2")
+
+</script>
+
 </body>
 </html>

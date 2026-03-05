@@ -1,7 +1,12 @@
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
 body{
 
-margin:0;
-font-family:Arial;
+font-family:Arial, Helvetica, sans-serif;
 
 background:linear-gradient(135deg,#020617,#0f172a);
 
@@ -11,35 +16,52 @@ display:flex;
 justify-content:center;
 align-items:center;
 
-height:100vh;
+min-height:100vh;
 
 }
 
-.container{
+.wrap{
 
-width:700px;
-max-width:90%;
-
-text-align:center;
+width:900px;
+max-width:95%;
 
 }
 
-h1{
+.title{
 
 font-size:40px;
+font-weight:bold;
+text-align:center;
+
 margin-bottom:30px;
 
 }
 
-.box-area{
+.panel{
 
-display:flex;
-gap:20px;
-justify-content:center;
+background:#0f172a;
+
+padding:30px;
+
+border-radius:15px;
+
+box-shadow:0 0 30px rgba(0,0,0,0.4);
 
 }
 
-.box{
+.grid{
+
+display:flex;
+
+gap:20px;
+
+justify-content:center;
+
+flex-wrap:wrap;
+
+}
+
+.card{
 
 background:#111827;
 
@@ -47,43 +69,69 @@ padding:20px;
 
 border-radius:15px;
 
-width:280px;
+width:320px;
 
-text-align:left;
+text-align:center;
 
 }
 
-.box label{
+.card h3{
 
-display:block;
 margin-bottom:10px;
-font-weight:bold;
 
 }
 
-input{
+.file input{
 
 width:100%;
 
 }
 
+.preview{
+
+margin-top:12px;
+
+width:100%;
+
+max-height:220px;
+
+border-radius:10px;
+
+border:1px solid #333;
+
+display:none;
+
+object-fit:contain;
+
+background:black;
+
+}
+
+.actions{
+
+text-align:center;
+
+margin-top:25px;
+
+}
+
 button{
 
-margin-top:30px;
-
 padding:15px 40px;
-
-font-size:18px;
 
 border:none;
 
 border-radius:10px;
+
+font-size:18px;
 
 background:#3b82f6;
 
 color:white;
 
 cursor:pointer;
+
+transition:0.2s;
 
 }
 
@@ -93,7 +141,7 @@ background:#2563eb;
 
 }
 
-#resultado{
+.result{
 
 margin-top:30px;
 
@@ -103,13 +151,20 @@ padding:20px;
 
 border-radius:12px;
 
+text-align:center;
+
+font-size:18px;
+
 }
 
-.dica{
+.hint{
 
 margin-top:15px;
 
 color:#9ca3af;
+
+text-align:center;
+
 font-size:14px;
 
 }

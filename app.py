@@ -14,8 +14,8 @@ def home():
 # Rota só pra confirmar se o servidor está enxergando as variáveis
 @app.get("/api/env-check")
 def env_check():
-    k = os.getenv("AbXQcHc-66dcHwg9wYh-jaVrUSdx7_HW") or ""
-    s = os.getenv("seYJHVvcm8rTq-BGXORvuSC6UIMOOpPg") or ""
+    k = os.getenv("FACEPP_API_KEY") or ""
+    s = os.getenv("FACEPP_API_SECRET") or ""
     return jsonify({
         "has_key": bool(k),
         "has_secret": bool(s),
@@ -26,8 +26,8 @@ def env_check():
 @app.post("/api/compare")
 def compare():
 
-    api_key = os.getenv("FACEPP_API_KEY")
-    api_secret = os.getenv("FACEPP_API_SECRET")
+    api_key = ("AbXQcHc-66dcHwg9wYh-jaVrUSdx7_HW")
+    api_secret = ("seYJHVvcm8rTq-BGXORvuSC6UIMOOpPg")
 
     img1 = request.files["img1"].read()
     img2 = request.files["img2"].read()
