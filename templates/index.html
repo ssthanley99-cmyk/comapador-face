@@ -2,39 +2,152 @@
 <html lang="pt-br">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Comparador Facial</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <h2>Comparador Facial</h2>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1>Comparador Facial</h1>
+          <div class="subtitle">Envie duas fotos e veja a semelhança em segundos.</div>
+        </div>
+      </div>
+      <div class="badge">Online</div>
+    </div>
 
-  <form id="form">
-    <p>Foto 1</p>
-    <input type="file" name="img1" accept="image/*" required>
+    <div class="card">
+      <form id="form" enctype="multipart/form-data">
+        <div class="grid">
+          <div class="block">
+            <h2>Foto 1</h2>
+            <input id="image1" name="image1" type="file" accept="image/*" required>
+            <div class="preview" id="preview1">
+              <div class="hint">Escolha uma imagem para ver a prévia.</div>
+              <img id="img1" alt="Prévia foto 1">
+            </div>
+          </div>
 
-    <p>Foto 2</p>
-    <input type="file" name="img2" accept="image/*" required>
+          <div class="block">
+            <h2>Foto 2</h2>
+            <input id="image2" name="image2" type="file" accept="image/*" required>
+            <div class="preview" id="preview2">
+              <div class="hint">Escolha uma imagem para ver a prévia.</div>
+              <img id="img2" alt="Prévia foto 2">
+            </div>
+          </div>
+        </div>
 
-    <br><br>
-    <button type="submit">Comparar</button>
-  </form>
+        <div class="actions">
+          <button class="btn" id="btn" type="submit" disabled>Comparar</button>
+          <div class="badge" id="status">Pronto</div>
+        </div>
+      </form>
 
-  <p id="out"></p>
+      <div id="errorBox" class="error" style="display:none;"></div>
+
+      <div id="resultBox" class="result" style="display:none;">
+        <div class="resultRow">
+          <div>
+            <div class="smallMuted">Semelhança (confidence)</div>
+            <div class="big" id="confidenceText">--</div>
+          </div>
+          <div class="badge" id="thresholdText">thresholds: --</div>
+        </div>
+        <div class="bar"><div id="barFill"></div></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Dica: fotos nítidas e com o rosto de frente dão resultados melhores.
+    </div>
+  </div>
 
   <script>
-    const form = document.getElementById("form");
-    const out = document.getElementById("out");
+    const image1 = document.getElementById('image1');
+    const image2 = document.getElementById('image2');
+    const img1 = document.getElementById('img1');
+    const img2 = document.getElementById('img2');
+    const preview1 = document.getElementById('preview1');
+    const preview2 = document.getElementById('preview2');
+    const btn = document.getElementById('btn');
+    const statusEl = document.getElementById('status');
 
-    form.addEventListener("submit", async (e) => {
+    const errorBox = document.getElementById('errorBox');
+    const resultBox = document.getElementById('resultBox');
+    const confidenceText = document.getElementById('confidenceText');
+    const thresholdText = document.getElementById('thresholdText');
+    const barFill = document.getElementById('barFill');
+
+    function setPreview(fileInput, imgEl, previewEl){
+      const file = fileInput.files && fileInput.files[0];
+      const hint = previewEl.querySelector('.hint');
+      if(!file){
+        imgEl.style.display = 'none';
+        if(hint) hint.style.display = 'block';
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      imgEl.src = url;
+      imgEl.onload = () => URL.revokeObjectURL(url);
+      imgEl.style.display = 'block';
+      if(hint) hint.style.display = 'none';
+    }
+
+    function refreshButton(){
+      btn.disabled = !(image1.files.length && image2.files.length);
+    }
+
+    image1.addEventListener('change', () => {
+      setPreview(image1, img1, preview1);
+      refreshButton();
+    });
+    image2.addEventListener('change', () => {
+      setPreview(image2, img2, preview2);
+      refreshButton();
+    });
+
+    document.getElementById('form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      out.textContent = "Comparando...";
+      errorBox.style.display = 'none';
+      resultBox.style.display = 'none';
 
-      const fd = new FormData(form);
-      const resp = await fetch("/api/compare", { method: "POST", body: fd });
-      const data = await resp.json();
+      statusEl.textContent = 'Comparando...';
+      btn.disabled = true;
+      btn.textContent = 'Comparando...';
 
-      if (!resp.ok) out.textContent = "Erro: " + (data.error || "desconhecido");
-      else out.textContent = "Semelhança (confidence): " + Number(data.confidence).toFixed(2);
+      try{
+        const fd = new FormData();
+        fd.append('image1', image1.files[0]);
+        fd.append('image2', image2.files[0]);
+
+        const res = await fetch('/api/compare', { method:'POST', body: fd });
+        const data = await res.json();
+
+        if(!res.ok){
+          throw new Error(data.error || 'Erro ao comparar.');
+        }
+
+        const conf = Number(data.confidence ?? 0);
+        confidenceText.textContent = conf.toFixed(2);
+        barFill.style.width = Math.max(0, Math.min(100, conf)) + '%';
+
+        const t = data.thresholds || {};
+        thresholdText.textContent = `thresholds: 1e-3=${t["1e-3"] ?? "-"} | 1e-4=${t["1e-4"] ?? "-"} | 1e-5=${t["1e-5"] ?? "-"}`;
+
+        resultBox.style.display = 'block';
+        statusEl.textContent = 'Pronto';
+      }catch(err){
+        errorBox.textContent = 'Erro: ' + (err.message || 'Falha inesperada');
+        errorBox.style.display = 'block';
+        statusEl.textContent = 'Erro';
+      }finally{
+        btn.textContent = 'Comparar';
+        refreshButton();
+      }
     });
   </script>
 </body>

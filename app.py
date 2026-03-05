@@ -43,7 +43,7 @@ def compare():
     }
 
     try:
-        r = requests.post(FACEPP_COMPARE_URL, data=data, timeout=30)
+        r = requests.post(FACEPP_COMPARE_URL, data=data, timeout=60)
         payload = r.json()
 
         if r.status_code != 200:
