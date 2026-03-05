@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Comparador Facial</title>
+</head>
+<body>
+  <h2>Comparador Facial</h2>
+
+  <form id="form">
+    <p>Foto 1</p>
+    <input type="file" name="img1" accept="image/*" required>
+
+    <p>Foto 2</p>
+    <input type="file" name="img2" accept="image/*" required>
+
+    <br><br>
+    <button type="submit">Comparar</button>
+  </form>
+
+  <p id="out"></p>
+
+  <script>
+    const form = document.getElementById("form");
+    const out = document.getElementById("out");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      out.textContent = "Comparando...";
+
+      const fd = new FormData(form);
+      const resp = await fetch("/api/compare", { method: "POST", body: fd });
+      const data = await resp.json();
+
+      if (!resp.ok) out.textContent = "Erro: " + (data.error || "desconhecido");
+      else out.textContent = "Semelhança (confidence): " + Number(data.confidence).toFixed(2);
+    });
+  </script>
+</body>
+</html>
