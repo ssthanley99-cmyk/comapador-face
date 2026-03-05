@@ -1,249 +1,159 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Comparador Facial</title>
-
-  <!-- CSS do seu projeto -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <style>
-    /* Fallback se o style.css não carregar (pra não ficar feio) */
-    :root{
-      --bg1:#050816;
-      --bg2:#0b1530;
-      --card: rgba(255,255,255,.06);
-      --border: rgba(255,255,255,.12);
-      --text: #eaf0ff;
-      --muted: rgba(234,240,255,.75);
-      --btn: #3b82f6;
-      --btn2:#2563eb;
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
-    }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: radial-gradient(1200px 600px at 50% 0%, #162a66 0%, var(--bg1) 55%, #02040e 100%);
-      min-height: 100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 28px 14px;
-    }
-    .wrap{
-      width: min(980px, 100%);
-    }
-    .title{
-      text-align:center;
-      font-weight: 800;
-      letter-spacing:.5px;
-      margin: 8px 0 22px;
-      font-size: clamp(28px, 4vw, 44px);
-      text-shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
-    .panel{
-      background: rgba(255,255,255,.04);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      padding: 18px;
-      backdrop-filter: blur(10px);
-    }
-    form{
-      display:flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    @media (max-width: 820px){
-      .grid{ grid-template-columns: 1fr; }
-    }
-    .card{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-    }
-    .card h3{
-      margin: 0 0 10px;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--muted);
-    }
-    .file{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      flex-wrap: wrap;
-    }
-    input[type="file"]{
-      max-width: 100%;
-    }
-    .preview{
-      margin-top: 12px;
-      width: 100%;
-      max-height: 220px; /* <<< aqui controla o tamanho da foto */
-      object-fit: contain;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(0,0,0,.25);
-      display:none;
-    }
-    .actions{
-      display:flex;
-      justify-content:center;
-      margin-top: 6px;
-    }
-    button{
-      background: linear-gradient(180deg, var(--btn) 0%, var(--btn2) 100%);
-      border: 1px solid rgba(255,255,255,.18);
-      color: white;
-      font-weight: 800;
-      letter-spacing:.3px;
-      padding: 14px 26px;
-      border-radius: 14px;
-      cursor:pointer;
-      box-shadow: 0 12px 30px rgba(37, 99, 235, .35);
-      font-size: 16px;
-      min-width: 190px;
-      transition: transform .08s ease;
-    }
-    button:active{
-      transform: scale(.98);
-    }
-    .result{
-      background: rgba(0,0,0,.25);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px 16px;
-      font-size: 18px;
-      line-height: 1.35;
-      min-height: 52px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      color: var(--text);
-    }
-    .error{
-      color: #ffb4b4;
-    }
-    .hint{
-      text-align:center;
-      color: rgba(234,240,255,.65);
-      font-size: 13px;
-      margin-top: 10px;
-    }
-  </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="title">Comparador Facial</div>
+  <div class="bg"></div>
 
-    <div class="panel">
-      <form id="formCompare" action="/compare" method="post" enctype="multipart/form-data">
-        <div class="grid">
-          <div class="card">
-            <h3>Foto 1</h3>
-            <div class="file">
-              <input id="image1" name="image1" type="file" accept="image/*" required />
-            </div>
-            <img id="preview1" class="preview" alt="Prévia Foto 1">
+  <main class="wrap">
+    <header class="top">
+      <h1>Comparador Facial</h1>
+      <p class="sub">Envie duas fotos e veja a semelhança (Face++).</p>
+    </header>
+
+    <section class="card">
+      <form id="formCompare" class="grid" enctype="multipart/form-data">
+        <div class="slot">
+          <div class="slot-head">
+            <h2>Foto 1</h2>
+            <label class="filebtn">
+              <input id="img1" name="image1" type="file" accept="image/*" required>
+              <span>Escolher arquivo</span>
+            </label>
           </div>
 
-          <div class="card">
-            <h3>Foto 2</h3>
-            <div class="file">
-              <input id="image2" name="image2" type="file" accept="image/*" required />
-            </div>
-            <img id="preview2" class="preview" alt="Prévia Foto 2">
+          <div class="preview">
+            <img id="prev1" alt="Preview Foto 1" />
+            <div class="preview-hint" id="hint1">Nenhuma foto selecionada</div>
+          </div>
+        </div>
+
+        <div class="slot">
+          <div class="slot-head">
+            <h2>Foto 2</h2>
+            <label class="filebtn">
+              <input id="img2" name="image2" type="file" accept="image/*" required>
+              <span>Escolher arquivo</span>
+            </label>
+          </div>
+
+          <div class="preview">
+            <img id="prev2" alt="Preview Foto 2" />
+            <div class="preview-hint" id="hint2">Nenhuma foto selecionada</div>
           </div>
         </div>
 
         <div class="actions">
-          <button type="submit" id="btnCompare">Comparar</button>
+          <button id="btnCompare" class="btn" type="submit">
+            Comparar
+          </button>
+          <div id="loading" class="loading" hidden>Comparando…</div>
         </div>
 
-        <div id="resultBox" class="result">
-          Selecione as duas fotos e clique em <b>Comparar</b>.
-        </div>
+        <div id="result" class="result" hidden></div>
 
-        <div class="hint">
-          Dica: fotos mais nítidas e com o rosto de frente dão resultado melhor.
-        </div>
+        <p class="tip">
+          Dica: foto nítida e rosto de frente dá resultado melhor.
+        </p>
       </form>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <script>
-    function setPreview(inputId, previewId){
-      const input = document.getElementById(inputId);
-      const img = document.getElementById(previewId);
+<script>
+  const img1 = document.getElementById("img1");
+  const img2 = document.getElementById("img2");
+  const prev1 = document.getElementById("prev1");
+  const prev2 = document.getElementById("prev2");
+  const hint1 = document.getElementById("hint1");
+  const hint2 = document.getElementById("hint2");
+  const form = document.getElementById("formCompare");
+  const resultBox = document.getElementById("result");
+  const loading = document.getElementById("loading");
+  const btn = document.getElementById("btnCompare");
 
-      input.addEventListener("change", () => {
-        const file = input.files && input.files[0];
-        if (!file) {
-          img.style.display = "none";
-          img.src = "";
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          img.src = e.target.result;
-          img.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      });
+  function setPreview(input, imgEl, hintEl) {
+    const file = input.files && input.files[0];
+    if (!file) {
+      imgEl.removeAttribute("src");
+      imgEl.style.display = "none";
+      hintEl.style.display = "block";
+      return;
     }
+    const url = URL.createObjectURL(file);
+    imgEl.src = url;
+    imgEl.style.display = "block";
+    hintEl.style.display = "none";
+  }
 
-    setPreview("image1", "preview1");
-    setPreview("image2", "preview2");
+  img1.addEventListener("change", () => setPreview(img1, prev1, hint1));
+  img2.addEventListener("change", () => setPreview(img2, prev2, hint2));
 
-    // (Opcional) enviar sem recarregar a página:
-    const form = document.getElementById("formCompare");
-    const resultBox = document.getElementById("resultBox");
-    const btn = document.getElementById("btnCompare");
+  function showResultOk(confidence, thresholds) {
+    const th = thresholds || {};
+    resultBox.className = "result ok";
+    resultBox.hidden = false;
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    const c = (confidence ?? 0).toFixed ? confidence.toFixed(2) : confidence;
 
+    resultBox.innerHTML = `
+      <div class="result-title">Semelhança</div>
+      <div class="score">${c}</div>
+      <div class="mini">
+        <span>Thresholds:</span>
+        <code>1e-3=${(th["1e-3"] ?? "-")}</code>
+        <code>1e-4=${(th["1e-4"] ?? "-")}</code>
+        <code>1e-5=${(th["1e-5"] ?? "-")}</code>
+      </div>
+    `;
+  }
+
+  function showResultErr(msg) {
+    resultBox.className = "result err";
+    resultBox.hidden = false;
+    resultBox.innerHTML = `<div class="result-title">Erro</div><div class="msg">${msg}</div>`;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    resultBox.hidden = true;
+    loading.hidden = false;
+    btn.disabled = true;
+
+    try {
       const fd = new FormData(form);
-      resultBox.classList.remove("error");
-      resultBox.innerText = "Comparando...";
 
-      btn.disabled = true;
-      btn.style.opacity = "0.8";
+      // IMPORTANTE: aqui é rota RELATIVA, funciona no Render e local
+      const res = await fetch("/api/compare", { method: "POST", body: fd });
 
-      try {
-        const res = await fetch("/api/compare", { method: "POST", body: fd });
-        const data = await res.json();
+      let data = null;
+      try { data = await res.json(); } catch {}
 
-        if (!res.ok) {
-          const msg = data?.error || "Erro ao comparar.";
-          resultBox.classList.add("error");
-          resultBox.innerText = "Erro: " + msg;
-        } else {
-          if (data?.confidence == null) {
-            resultBox.classList.add("error");
-            resultBox.innerText = "Erro: a API não retornou confidence. " + JSON.stringify(data);
-          } else {
-            resultBox.innerHTML = `Semelhança (confidence): <b>${Number(data.confidence).toFixed(2)}</b>`;
-          }
-        }
-      } catch (err) {
-        resultBox.classList.add("error");
-        resultBox.innerText = "Erro: Falha de rede ao comparar.";
-      } finally {
-        btn.disabled = false;
-        btn.style.opacity = "1";
+      if (!res.ok) {
+        const msg = (data && (data.error || data.error_message)) ? (data.error || data.error_message) : `Erro HTTP ${res.status}`;
+        showResultErr(msg);
+        return;
       }
-    });
-  </script>
+
+      if (!data || typeof data.confidence === "undefined") {
+        showResultErr((data && (data.error || data.error_message)) ? (data.error || data.error_message) : "Resposta inválida do servidor.");
+        return;
+      }
+
+      showResultOk(data.confidence, data.thresholds);
+    } catch (err) {
+      showResultErr("Falha de rede ao comparar (servidor fora do ar ou rota /api/compare com erro).");
+    } finally {
+      loading.hidden = true;
+      btn.disabled = false;
+    }
+  });
+</script>
+
 </body>
 </html>
